@@ -40,13 +40,16 @@ for(i in species){
   lomu<-as.integer(dat$LOMU)
   pler<-as.integer(dat$PLER)
   
-    if (species == "TACA" |"LOMU"){
-  weeds <- as.integer(dat$total_weeds)} 
-  else if(species == "GITR" |"PLER"){
-    weeds<-as.integer(dat$total_weed_cover)
-  }
-  else if (species=="ACAM"){
-    weeds<-as.integer(dat$neigh_weeds)
+    if (species[i] == "TACA"){
+  weeds[i] <- as.integer(dat$total_weeds) 
+  } else if(species[i]=="LOMU"){
+  weeds[i] <- as.integer(dat$total_weeds)
+  } else if(species[i] == "GITR"){
+  weeds[i]<-as.integer(dat$total_weed_cover)
+  } else if(species[i] == "PLER"){
+  weeds[i]<-as.integer(dat$total_weed_cover)
+  }else if (species[i]=="ACAM"){
+  weeds[i]<-as.integer(dat$neigh_weeds)
   }
   
   
