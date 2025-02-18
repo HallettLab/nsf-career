@@ -55,15 +55,14 @@ model{
   sigma~gamma(1,1);
   epsilon~gamma (sigma,sigma);
   lambda_base~exponential(0.0009);//check on this for my data
-  lambda_dev~normal(0,100);//check on this
-  
+
   alpha_acam_base~normal(0,5);
   alpha_avba_base~normal(0,5);
   alpha_gitr_base~normal(0,5);
   alpha_lomu_base~normal(0,5);
   alpha_pler_base~normal(0,5);
   alpha_taca_base~normal(0,5);
-  alpha_weeds_base~normal(0,5);
+  alpha_weeds_base~normal(0,5);//might have to change when weeds are in stems vs percents
 
 //BH model
 

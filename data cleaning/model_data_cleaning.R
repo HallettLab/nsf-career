@@ -118,8 +118,8 @@ mod_dat_taca<-taca_all%>%mutate(phyto2=phyto,
   filter(ph_n_indiv!=0)%>%
   ##### add in bkg indivs for monos, should be set to 0?
   select(-c("biomass","avg_biomass","water","grazing","nitrogen","ph_unique","ph_date","ph_initials","ph_notes","bg_date","bg_initials","bg_notes","seed_notes","unique.ID","wd_grass_indiv","wd_forb_indiv","wd_grass_cover","wd_forb_cover","bare_cover","cover_notes"))
-mod_dat_taca<-left_join(mod_dat2,mean_germ)
-mod_dat_taca<-left_join(mod_dat2,seed_dat) #### gets background and phyto collections in, no monos, are those only used for setting lambda priors?
+mod_dat_taca<-left_join(mod_dat_taca,mean_germ)
+mod_dat_taca<-left_join(mod_dat_taca,seed_dat) #### gets background and phyto collections in, no monos, are those only used for setting lambda priors?
 
 ########## taca bkgs don't have weed counts so is set to 0, can estimate like bkg plots?
 
@@ -455,11 +455,9 @@ mod_dat_gitr<-left_join(mod_dat_gitr,mean_germ)
 mod_dat_gitr<-left_join(mod_dat_gitr,seed_dat) 
 
 ########merging species data
-full_join(mod_dat_acam,mod_dat_gitr,mod_dat_lomu)
-rbind(mod_dat_acam,mod_dat_gitr)
-
 df_list<-list(mod_dat_acam,mod_dat_gitr,mod_dat_lomu,mod_dat_pler,mod_dat_taca)
 model_dat<-df_list %>% reduce(full_join)
+write_csv(model_dat,"career_model_data.csv")
 ########### ERBO
 
 
