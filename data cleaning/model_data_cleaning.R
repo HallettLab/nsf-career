@@ -11,10 +11,11 @@ germ_dat<-read.csv("20220218_Germination-Data_full.csv")
 mean_germ<-germ_dat%>%group_by(Species)%>%
   summarise(mean_germ=mean(p.germ))%>%
   ungroup()%>%
-  filter(Species %in% c("ACMAME","AVEBAR","ELYCAP","EROBOT","GILTRI","PLAERE","TRIWIL"))%>%
+  filter(Species %in% c("ACMAME","AVEBAR","ELYCAP","EROBOT","FESPER","GILTRI","PLAERE","TRIWIL"))%>%
   mutate(Species=ifelse(Species=="ACMAME","ACAM",Species),
          Species=ifelse(Species=="AVEBAR","AVBA",Species),
          Species=ifelse(Species=="ELYCAP","TACA",Species),
+         Species=ifelse(Species=="FESPER","LOMU",Species),
          Species=ifelse(Species=="EROBOT","ERBO",Species),
          Species=ifelse(Species=="GILTRI","GITR",Species),
          Species=ifelse(Species=="PLAERE","PLER",Species),
@@ -457,7 +458,8 @@ mod_dat_gitr<-left_join(mod_dat_gitr,seed_dat)
 ########merging species data
 df_list<-list(mod_dat_acam,mod_dat_gitr,mod_dat_lomu,mod_dat_pler,mod_dat_taca)
 model_dat<-df_list %>% reduce(full_join)
-write_csv(model_dat,"career_model_data.csv")
+#write_csv(model_dat,"career_model_data.csv")
+
 ########### ERBO
 
 
