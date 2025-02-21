@@ -1,7 +1,7 @@
 ## Model 
 setwd("~/Desktop/career_r/data")
 model.dat <- read.csv("career_model_data.csv")%>%
-  filter(!(is.na(num_seeds)))
+  filter(!(is.na(num_seeds)))##### removes samples that are in datasheet but weren't found during processing
 setwd("~/Desktop/career_repo")
 
 library(tictoc)
@@ -31,10 +31,10 @@ for(i in species){
   Blocks <- as.integer(dat$block) ## vector of block vals, might need to be changed if subsetting by treatment
   
   N <- as.integer(length(Fecundity)) ## number of observations
-    if (N!=0) print(N)
-    else next
-    
-  N_i <- as.integer(dat$ph_n_indiv) ## stem # of focal species
+  if (N!=0){print(paste(i,j,N,sep = "_"))}
+  else next
+  
+  N_i<- as.integer(dat$ph_n_indiv) ## stem # of focal species
   g_i<-dat$mean_germ
   s_i<-dat$mean_surv
   
@@ -60,17 +60,14 @@ for(i in species){
     }
   }
 
-  
-  
   ## make a vector of data inputs to model
   
-  data_vec <- c("N","Fecundity", "N_i","g_i","s_i", "N_blocks", "Blocks", "weeds","acam","avba","erbo","gitr","lomu","pler")
+  data_vec <- c("N","Fecundity","N_i","g_i","s_i","N_blocks","Blocks","weeds","acam","avba","erbo","gitr","lomu","pler","taca")
   
-  print(paste(i,j,sep = "_"))
-  
+
   ## create initials for epsilon and sigma
-  initials <- list(epsilon=rep(1,N_blocks), sigma = 1,lambda_base=2,alpha_acam_base=2,alpha_avba_base=2,alpha_gitr_base=2,
-                   alpha_lomu_base=2,alpha_pler_base=2,alpha_erbo_base=2,alpha_weeds_base=2)
+  initials <- list(epsilon=rep(1,N_blocks), sigma = 1,alpha_acam_base=2,alpha_avba_base=2,alpha_erbo_base=2,
+                   alpha_gitr_base=2,alpha_lomu_base=2,alpha_pler_base=2,alpha_taca_base=2,alpha_weeds_base=2)
                   
   initials1<- list(initials, initials, initials)
   
@@ -79,6 +76,7 @@ for(i in species){
 PrelimFit <- stan(file = "~/Desktop/career_repo/models/beverton_holt_negbi.stan", 
                    data = data_vec, init = initials1, iter = 1000, chains = 3, cores=3, 
                    control = list(adapt_delta = 0.9, max_treedepth = 15)) 
+  print(paste("running",i,j,sep = "_"))
   
   ## save model output
   save(PrelimFit, file = paste0("~/Desktop/career_repo/model_outputs/",i,"_",j,"_posteriors_BH_negbin", date ,".rdata"))
