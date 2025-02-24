@@ -15,7 +15,7 @@ rstan_options(auto_write = TRUE)
 
 date <- Sys.Date()
 species <- c("ACAM","GITR","PLER","TACA","LOMU")
-treatment<-c("D","A","I","AG","ANG","ING","IN","DNG","IG","AN","DN","ACN","AC","DG")
+treatment<-c("D","A","AC","AG","ANG","ING","IN","DNG","IG","AN","DN","ACN","DG","I")
 model.output <- list()
 warnings <- list()
 
@@ -29,10 +29,17 @@ for(i in species){
   Fecundity <- as.integer(round(dat$num_seeds)) ## seeds out, is it the number of seeds or the average?
   N_blocks <- as.integer(length(unique(dat$block))) ## number of blocks
   Blocks <- as.integer(dat$block) ## vector of block vals, might need to be changed if subsetting by treatment
-  
+  # for each unique value in Blocks, reorder starting at 1 for the lowest value in vector, then 2 for second lowest etc.
+  block_id<-unique(dat$block)
+  for(f in 1:length(block_id)){
+    
+  }
+    
+    
+    
   N <- as.integer(length(Fecundity)) ## number of observations
   if (N!=0){print(paste(i,j,N,sep = "_"))}
-  else next
+  else next ####### I think this logic loop runs through itself entirely before moving on
   
   N_i<- as.integer(dat$ph_n_indiv) ## stem # of focal species
   g_i<-dat$mean_germ
@@ -73,10 +80,11 @@ for(i in species){
   
   # Model ####
   
-PrelimFit <- stan(file = "~/Desktop/career_repo/models/beverton_holt_negbi.stan", 
+PrelimFit <- stan(file="~/Desktop/career_repo/models/beverton_holt_negbi.stan", 
                    data = data_vec, init = initials1, iter = 1000, chains = 3, cores=3, 
                    control = list(adapt_delta = 0.9, max_treedepth = 15)) 
-  print(paste("running",i,j,sep = "_"))
+  
+print(paste("running",i,j,sep = "_"))
   
   ## save model output
   save(PrelimFit, file = paste0("~/Desktop/career_repo/model_outputs/",i,"_",j,"_posteriors_BH_negbin", date ,".rdata"))
