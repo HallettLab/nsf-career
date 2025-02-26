@@ -1,15 +1,15 @@
-## Model 
-setwd("~/Desktop/career_r/data")
-model.dat <- read.csv("career_model_data.csv")%>%
-  filter(!(is.na(num_seeds)))##### removes samples that are in datasheet but weren't found during processing
-setwd("~/Desktop/career_repo")
-
+## Model script
 library(tictoc)
 library(beepr)
 library(tidyverse)
 library(bayesplot)
 library(rstan)
 library(here)
+setwd("~/Desktop/career_r/data")
+model.dat <- read.csv("career_model_data.csv")%>%
+  filter(!(is.na(num_seeds)))##### removes samples that are in datasheet but weren't found during processing
+setwd("~/Desktop/career_repo")
+
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 
@@ -19,7 +19,6 @@ treatment<-c("D","A","AC","AG","ANG","ING","IN","DNG","IG","AN","DN","ACN","DG",
 model.output <- list()
 warnings <- list()
 
-
 for(i in species){
   for(j in treatment){
   tic("model time")
@@ -27,19 +26,25 @@ for(i in species){
   
   ## create vectors of the various data inputs
   Fecundity <- as.integer(round(dat$num_seeds)) ## seeds out, is it the number of seeds or the average?
-  N_blocks <- as.integer(length(unique(dat$block))) ## number of blocks
-  Blocks <- as.integer(dat$block) ## vector of block vals, might need to be changed if subsetting by treatment
-  # for each unique value in Blocks, reorder starting at 1 for the lowest value in vector, then 2 for second lowest etc.
-  block_id<-unique(dat$block)
-  for(f in 1:length(block_id)){
-    
-  }
-    
-    
-    
   N <- as.integer(length(Fecundity)) ## number of observations
   if (N!=0){print(paste(i,j,N,sep = "_"))}
   else next ####### I think this logic loop runs through itself entirely before moving on
+  
+  N_blocks <- as.integer(length(unique(dat$block))) ## number of blocks
+  block <- as.integer(unique(dat$block))## vector of block vals, might need to be changed if subsetting by treatment
+  # for each unique value in Blocks, reorder starting at 1 for the lowest value in vector, then 2 for second lowest etc.
+  if (length(block)==4){
+    block_new<-c(1,2,3,4)
+  } else if (length(block)==3){
+    block_new<-c(1,2,3)
+  } else if (length(block)==2){
+    block_new<-c(1,2)
+  }else if (length(block)==1){
+    block_new<-1
+  }
+  bl_rep<-as.data.frame(cbind(block,block_new))
+  dat<-left_join(dat,bl_rep,by="block")
+  Blocks<-as.integer(dat$block_new)
   
   N_i<- as.integer(dat$ph_n_indiv) ## stem # of focal species
   g_i<-dat$mean_germ
@@ -65,7 +70,7 @@ for(i in species){
     }else if (i=="ACAM"){
       weeds<-as.integer(dat$neigh_weeds)
     }
-  }
+  
 
   ## make a vector of data inputs to model
   
@@ -76,12 +81,12 @@ for(i in species){
   initials <- list(epsilon=rep(1,N_blocks), sigma = 1,alpha_acam_base=2,alpha_avba_base=2,alpha_erbo_base=2,
                    alpha_gitr_base=2,alpha_lomu_base=2,alpha_pler_base=2,alpha_taca_base=2,alpha_weeds_base=2)
                   
-  initials1<- list(initials, initials, initials)
+  initials1<- list(initials, initials, initials,initials)
   
   # Model ####
   
-PrelimFit <- stan(file="~/Desktop/career_repo/models/beverton_holt_negbi.stan", 
-                   data = data_vec, init = initials1, iter = 1000, chains = 3, cores=3, 
+PrelimFit <- stan(file="~/Desktop/career_repo/models/beverton_holt_negbi.stan", model_name="beverton_holt_negbi",
+                   data = data_vec, init = initials1, iter = 1000, chains = 4, cores=4, thin=1,
                    control = list(adapt_delta = 0.9, max_treedepth = 15)) 
   
 print(paste("running",i,j,sep = "_"))
@@ -91,6 +96,6 @@ print(paste("running",i,j,sep = "_"))
   beep(8)
   toc()
   }
-
+}
 ######## diag
 launch_shinystan(PrelimFit)
