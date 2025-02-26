@@ -86,7 +86,7 @@ for(i in species){
   # Model ####
   
 PrelimFit <- stan(file="~/Desktop/career_repo/models/beverton_holt_negbi.stan", model_name="beverton_holt_negbi",
-                   data = data_vec, init = initials1, iter = 1000, chains = 4, cores=4, thin=1,
+                   data = data_vec, init = initials1, iter = 10000, chains = 4, cores=4, thin=1,
                    control = list(adapt_delta = 0.9, max_treedepth = 15)) 
   
 print(paste("running",i,j,sep = "_"))
