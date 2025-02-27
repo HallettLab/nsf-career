@@ -78,15 +78,15 @@ for(i in species){
   
 
   ## create initials for epsilon and sigma
-  initials <- list(epsilon=rep(1,N_blocks), sigma = 1,alpha_acam_base=2,alpha_avba_base=2,alpha_erbo_base=2,
-                   alpha_gitr_base=2,alpha_lomu_base=2,alpha_pler_base=2,alpha_taca_base=2,alpha_weeds_base=2)
+  initials <- list(epsilon=rep(1,N_blocks), sigma = 1,alpha_acam_base=1,alpha_avba_base=1,alpha_erbo_base=1,
+                   alpha_gitr_base=1,alpha_lomu_base=1,alpha_pler_base=1,alpha_taca_base=1,alpha_weeds_base=1)
                   
   initials1<- list(initials, initials, initials,initials)
   
   # Model ####
   
 PrelimFit <- stan(file="~/Desktop/career_repo/models/beverton_holt_negbi.stan", model_name="beverton_holt_negbi",
-                   data = data_vec, init = initials1, iter = 10000, chains = 4, cores=4, thin=1,
+                   data = data_vec, init = initials1, iter = 20000, chains = 4, cores=4, thin=1,
                    control = list(adapt_delta = 0.9, max_treedepth = 15)) 
   
 print(paste("running",i,j,sep = "_"))
