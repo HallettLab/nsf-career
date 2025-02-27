@@ -14,7 +14,7 @@ options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 
 date <- Sys.Date()
-species <- c("ACAM","GITR","PLER","TACA","LOMU")
+species <- c("ACAM","GITR","LOMU","PLER","TACA")
 treatment<-c("D","A","AC","AG","ANG","ING","IN","DNG","IG","AN","DN","ACN","DG","I")
 model.output <- list()
 warnings <- list()
