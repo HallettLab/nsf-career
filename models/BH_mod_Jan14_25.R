@@ -15,6 +15,7 @@ rstan_options(auto_write = TRUE)
 
 date <- Sys.Date()
 species <- c("ACAM","ERBO","GITR","LOMU","PLER","TACA")
+species <- c("ACAM","GITR","LOMU","PLER","TACA")
 treatment<-c("D","A","AC","AG","ANG","ING","IN","DNG","IG","AN","DN","ACN","DG","I")
 model.output <- list()
 warnings <- list()
@@ -99,5 +100,3 @@ PrelimFit <- stan(file="~/Desktop/career_repo/models/beverton_holt_negbi.stan", 
   toc()
   }
 }
-######## diag
-launch_shinystan(PrelimFit)
