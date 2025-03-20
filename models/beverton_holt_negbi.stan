@@ -47,7 +47,7 @@ model{
   lambda_base~exponential(0.0009);//check on this for my data, make a variable and read in to use meagcomp as priors?
   alpha_acam~normal(0,5);
   alpha_avba~normal(0,5);
-  alpha_erbo~normal(0,5)
+  alpha_erbo~normal(0,5);
   alpha_gitr~normal(0,5);
   alpha_lomu~normal(0,5);
   alpha_pler~normal(0,5);
