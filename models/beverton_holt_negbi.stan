@@ -25,16 +25,16 @@ parameters{
   real epsilon [N_blocks];
   real<lower=0> disp_dev; //might only be required with the negative binomial?
   //lambda
-  real <lower=0,upper=15000> lambda_base;
+  real <lower=0,upper=20000> lambda_base;
   //alphas
-  real  alpha_weeds_base;
-  real  alpha_acam_base;
-  real  alpha_avba_base;
-  real  alpha_erbo_base;
-  real  alpha_gitr_base;
-  real  alpha_lomu_base;
-  real  alpha_pler_base;
-  real  alpha_taca_base;
+  real  alpha_weeds;
+  real  alpha_acam;
+  real  alpha_avba;
+  real  alpha_erbo;
+  real  alpha_gitr;
+  real  alpha_lomu;
+  real  alpha_pler;
+  real  alpha_taca;
 }
 // model block
 model{
@@ -45,24 +45,25 @@ model{
   sigma~gamma(1,1);
   epsilon~gamma (sigma,sigma);
   lambda_base~exponential(0.0009);//check on this for my data, make a variable and read in to use meagcomp as priors?
-  alpha_acam_base~normal(0,5);
-  alpha_avba_base~normal(0,5);
-  alpha_gitr_base~normal(0,5);
-  alpha_lomu_base~normal(0,5);
-  alpha_pler_base~normal(0,5);
-  alpha_taca_base~normal(0,5);
-  alpha_weeds_base~normal(0,5);//might have to change when weeds are in stems vs percents
+  alpha_acam~normal(0,5);
+  alpha_avba~normal(0,5);
+  alpha_erbo~normal(0,5)
+  alpha_gitr~normal(0,5);
+  alpha_lomu~normal(0,5);
+  alpha_pler~normal(0,5);
+  alpha_taca~normal(0,5);
+  alpha_weeds~normal(0,5);//might have to change when weeds are in stems vs percents
 //BH model
 for(i in 1:N){
 F_hat[i]=s_i[i]*(1-g_i[i])+(N_i[i]*g_i[i]*(lambda_base)/(1+
-  acam[i]*(alpha_acam_base*g_i[i])+
-  avba[i]*(alpha_avba_base*g_i[i])+
-  erbo[i]*(alpha_erbo_base*g_i[i])+
-  gitr[i]*(alpha_gitr_base*g_i[i])+
-  lomu[i]*(alpha_lomu_base*g_i[i])+
-  pler[i]*(alpha_pler_base*g_i[i])+
-  taca[i]*(alpha_taca_base*g_i[i])+
-  weeds[i]*(alpha_weeds_base*g_i[i])));
+  acam[i]*(alpha_acam*g_i[i])+
+  avba[i]*(alpha_avba*g_i[i])+
+  erbo[i]*(alpha_erbo*g_i[i])+
+  gitr[i]*(alpha_gitr*g_i[i])+
+  lomu[i]*(alpha_lomu*g_i[i])+
+  pler[i]*(alpha_pler*g_i[i])+
+  taca[i]*(alpha_taca*g_i[i])+
+  weeds[i]*(alpha_weeds*g_i[i])));
   F_hat2[i]=F_hat[i]*epsilon[Blocks[i]];//block effect
 }
 //likelihood

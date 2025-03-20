@@ -14,7 +14,7 @@ options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 
 date <- Sys.Date()
-species <- c("ACAM","GITR","PLER","TACA","LOMU")
+species <- c("ACAM","ERBO","GITR","LOMU","PLER","TACA")
 treatment<-c("D","A","AC","AG","ANG","ING","IN","DNG","IG","AN","DN","ACN","DG","I")
 model.output <- list()
 warnings <- list()
@@ -67,7 +67,10 @@ for(i in species){
       weeds<-as.integer(dat$total_weed_cover)
     } else if(i== "PLER"){
       weeds<-as.integer(dat$total_weed_cover)
-    }else if (i=="ACAM"){
+    }else if (i=="ERBO"){
+      weeds<-as.integer(dat$total_weed_cover)
+    }
+  else if (i=="ACAM"){
       weeds<-as.integer(dat$neigh_weeds)
     }
   
@@ -84,13 +87,12 @@ for(i in species){
   initials1<- list(initials, initials, initials,initials)
   
   # Model ####
-  
+print(paste("running",i,j,sep = "_"))
 PrelimFit <- stan(file="~/Desktop/career_repo/models/beverton_holt_negbi.stan", model_name="beverton_holt_negbi",
                    data = data_vec, init = initials1, iter = 20000, chains = 4, cores=4, thin=1,
                    control = list(adapt_delta = 0.9, max_treedepth = 15)) 
   
-print(paste("running",i,j,sep = "_"))
-  
+
   ## save model output
   save(PrelimFit, file = paste0("~/Desktop/career_repo/model_outputs/",i,"_",j,"_posteriors_BH_negbin", date ,".rdata"))
   beep(8)

@@ -25,7 +25,7 @@ mean_germ<-germ_dat%>%group_by(Species)%>%
 ### write_csv(mean_germ,"CAREER_mean_germ.csv)
 
 ### seed surv data
-seed_dat<-read_csv("CAREER_mean_seed_surv.csv")
+seed_dat<-read_csv("CAREER_mean_seed_surv.csv") ### erbo surv taken from Rice 1985 paper
 
 ########### species data
 taca<-read_csv("taca_phyto_biomass.csv")
@@ -33,6 +33,7 @@ acam<-read_csv("acam_phyto_biomass.csv")
 pler<-read_csv("pler_phyto_biomass.csv")
 gitr<-read_csv("gitr_phyto_biomass.csv")
 lomu<-read_csv("lomu_phyto_biomass.csv")
+erbo<-read_csv("erbo_phyto_counts.csv")
 bl_key<-read_csv("block_treatments.csv")
 
 ############# clean up taca
@@ -455,12 +456,83 @@ mod_dat_gitr<-gitr_all%>%mutate(phyto2=phyto,
 mod_dat_gitr<-left_join(mod_dat_gitr,mean_germ)
 mod_dat_gitr<-left_join(mod_dat_gitr,seed_dat) 
 
+########### ERBO
+erbo<-erbo%>%left_join(bl_key,by="block")%>%
+#filter(biomass!="NA")%>%
+mutate(avg_flowers=total_flowers/ph_n_indiv)%>%
+  mutate(num_seeds=total_flowers*5)%>%
+  mutate(avg_seeds=avg_flowers*5)
+
+########### getting estimates of bkg plots for bkg collections
+bkg_plots<-read_csv("bkg_estimates_all.csv")
+na_plots<-bkg_plots%>%filter(background!="Mono")%>%
+  filter(is.na(bg_n_indiv))%>%
+  filter(is.na(ph_date) & is.na(ph_initials))
+
+erbo_bkg_col<-read_csv("erbo_bkg_counts.csv")%>%
+  filter(bg_n_indiv_collected !=0)%>%
+  mutate(num_seeds=total_flowers *5 ,
+         avg_flowers=total_flowers/bg_n_indiv_collected,
+         avg_seeds=avg_flowers *5 )%>%
+  rename(phyto=species,ph_n_indiv=bg_n_indiv_collected)%>%
+  select(-c("bg_notes","processing_notes","scale_id","bg_date","bg_initials","initials","processing_notes"))
+
+
+erbo_bkg_plots<-bkg_plots%>%filter(background!="Mono")%>%
+  filter(background!="LOMU_mono" & background!="BRHO" & background !="Hirtum")%>%
+  filter(background=="ERBO")%>%
+  filter(!(is.na(bg_n_indiv)))%>%
+  group_by(block, plot, background)%>%
+  summarise(avg_bkg_n=mean(bg_n_indiv))%>%
+  rename(bg_n_indiv=avg_bkg_n)
+
+erbo_bkg_plots$bg_n_indiv<-round(erbo_bkg_plots$bg_n_indiv) ### avg num of taca in bkg plots from phyto collections
+erbo_bkg_plots<-left_join(erbo_bkg_col,erbo_bkg_plots)
+erbo_bkg_plots<-left_join(erbo_bkg_plots,bl_key)
+
+erbo_all<-full_join(erbo,erbo_bkg_plots)%>%
+  filter(ph_n_indiv!=0)%>%
+  mutate(background=ifelse(background=="ERBO_mono","Mono",background))%>%
+  filter(background!="Mono" & background!="BRHO" & background !="Hirtum")
+
+
+##### need to add in 0 for mono bkg indiv (weeds?) and estimated bkg densities for L and H density bkg collections
+######## model data including 0 indivs and all mono indivs
+mod_dat_erbo<-erbo_all%>%mutate(phyto2=phyto,
+                                background2=background,
+                                background3=background,
+                                bg_n_indiv2=bg_n_indiv,
+                                treatment2=treatment)%>%
+  pivot_wider(names_from = background2,values_from = bg_n_indiv2)%>%
+  unite("combo",c("phyto2","background3","treatment2"),sep = "_")%>%
+  mutate_at(vars(c("GITR":"ERBO")),~replace_na(.,0))%>%
+  mutate_at(vars(c("GITR":"ERBO")),as.numeric)%>%
+  mutate_at(vars("total_weed_cover"),~replace_na(.,0))%>%
+  mutate(trt=ifelse(treatment=="A",1,treatment),
+         trt=ifelse(treatment=="AC",2,trt),
+         trt=ifelse(treatment=="ACN",3,trt),
+         trt=ifelse(treatment=="AG",4,trt),
+         trt=ifelse(treatment=="AN",5,trt),
+         trt=ifelse(treatment=="ANG",6,trt),
+         trt=ifelse(treatment=="D",7,trt),
+         trt=ifelse(treatment=="DG",8,trt),
+         trt=ifelse(treatment=="DN",9,trt),
+         trt=ifelse(treatment=="DNG",10,trt),
+         trt=ifelse(treatment=="I",11,trt),
+         trt=ifelse(treatment=="IG",12,trt),
+         trt=ifelse(treatment=="IN",13,trt),
+         trt=ifelse(treatment=="ING",14,trt))%>%
+  filter(ph_n_indiv!=0)%>%
+  ##### add in bkg indivs for monos, should be set to 0?
+  select(-c("biomass","water","grazing","nitrogen","phyto_unique","phyto_date","Initials_ph","Phyto_notes","background_date","Initials_bg","Background_notes","scale_id","disturbance_cover","bare_cover","weed_notes","processing_notes","initials"))
+mod_dat_erbo<-left_join(mod_dat_erbo,mean_germ)
+mod_dat_erbo<-left_join(mod_dat_erbo,seed_dat) 
+
 ########merging species data
-df_list<-list(mod_dat_acam,mod_dat_gitr,mod_dat_lomu,mod_dat_pler,mod_dat_taca)
+df_list<-list(mod_dat_acam,mod_dat_erbo,mod_dat_gitr,mod_dat_lomu,mod_dat_pler,mod_dat_taca)
 model_dat<-df_list %>% reduce(full_join)
 #write_csv(model_dat,"career_model_data.csv")
-
-########### ERBO
+#############################
 
 
 ############## Creating datasheet of missing samples
