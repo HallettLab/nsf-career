@@ -16,6 +16,7 @@ vector [N] gitr;
 vector [N] lomu;
 vector [N] pler;
 vector [N] taca;
+vector [N] trwi;
 vector [N] weeds;
 }
 //model parameters 
@@ -35,6 +36,7 @@ parameters{
   real  alpha_lomu;
   real  alpha_pler;
   real  alpha_taca;
+  real  alpha_trwi;
 }
 // model block
 model{
@@ -52,6 +54,7 @@ model{
   alpha_lomu~normal(0,5);
   alpha_pler~normal(0,5);
   alpha_taca~normal(0,5);
+  alpha_trwi~normal(0,5);
   alpha_weeds~normal(0,5);//might have to change when weeds are in stems vs percents
 //BH model
 for(i in 1:N){
@@ -63,6 +66,7 @@ F_hat[i]=s_i[i]*(1-g_i[i])+(N_i[i]*g_i[i]*(lambda_base)/(1+
   lomu[i]*(alpha_lomu*g_i[i])+
   pler[i]*(alpha_pler*g_i[i])+
   taca[i]*(alpha_taca*g_i[i])+
+  trwi[i] *(alpha_trwi*g_i[i])+
   weeds[i]*(alpha_weeds*g_i[i])));
   F_hat2[i]=F_hat[i]*epsilon[Blocks[i]];//block effect
 }

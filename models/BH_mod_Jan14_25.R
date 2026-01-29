@@ -14,7 +14,7 @@ options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 
 date <- Sys.Date()
-species <- c("ACAM","ERBO","GITR","LOMU","PLER","TACA")
+species <- c("ACAM","AVBA","ERBO","GITR","LOMU","PLER","TACA","TRWI")
 treatment<-c("D","A","AC","AG","ANG","ING","IN","DNG","IG","AN","DN","ACN","DG","I")
 model.output <- list()
 warnings <- list()
@@ -32,7 +32,7 @@ for(i in species){
   
   N_blocks <- as.integer(length(unique(dat$block))) ## number of blocks
   block <- as.integer(unique(dat$block))## vector of block vals, might need to be changed if subsetting by treatment
-  # for each unique value in Blocks, reorder starting at 1 for the lowest value in vector, then 2 for second lowest etc.
+  # for each unique value in blocks, reorder starting at 1 for the lowest value in vector, then 2 for second lowest etc.
   if (length(block)==4){
     block_new<-c(1,2,3,4)
   } else if (length(block)==3){
@@ -58,31 +58,38 @@ for(i in species){
   gitr<-as.integer(dat$GITR)
   lomu<-as.integer(dat$LOMU)
   pler<-as.integer(dat$PLER)
+  avba<-as.integer(dat$AVBA)
+  trwi<-as.integer(dat$TRIW)
+  
   
     if (i== "TACA"){
       weeds <- as.integer(dat$total_weeds_n) 
     } else if(i=="LOMU"){
       weeds <- as.integer(dat$total_weeds_n)
+    } else if(i=="AVBA"){
+      weeds <- as.integer(dat$total_weeds_n) 
     } else if(i == "GITR"){
       weeds<-as.integer(dat$total_weed_cover)
     } else if(i== "PLER"){
       weeds<-as.integer(dat$total_weed_cover)
     }else if (i=="ERBO"){
       weeds<-as.integer(dat$total_weed_cover)
+    }else if (i=="TRWI"){
+      weeds<-as.integer(dat$total_weed_cover)
     }
-  else if (i=="ACAM"){
+    else if (i=="ACAM"){
       weeds<-as.integer(dat$neigh_weeds)
     }
   
 
   ## make a vector of data inputs to model
   
-  data_vec <- c("N","Fecundity","N_i","g_i","s_i","N_blocks","Blocks","weeds","acam","avba","erbo","gitr","lomu","pler","taca")
+  data_vec <- c("N","Fecundity","N_i","g_i","s_i","N_blocks","Blocks","weeds","acam","avba","erbo","gitr","lomu","pler","taca","trwi")
   
 
   ## create initials for epsilon and sigma
-  initials <- list(epsilon=rep(1,N_blocks), sigma = 1,alpha_acam=1,alpha_avba=1,alpha_erbo=1,
-                   alpha_gitr=1,alpha_lomu=1,alpha_pler=1,alpha_taca=1,alpha_weeds=1)
+  initials <- list(epsilon=rep(1,N_blocks), sigma = 1,alpha_acam=0.1,alpha_avba=0.11,alpha_erbo=0.1,
+                   alpha_gitr=0.1,alpha_lomu=0.1,alpha_pler=0.1,alpha_taca=0.1,alpha_trwi=0.1,alpha_weeds=0.1)
                   
   initials1<- list(initials, initials, initials, initials)
   
