@@ -8,6 +8,8 @@ data{
   vector[N] N_i;// pop size at time t
   vector[N] g_i;// mean germ rate
   vector[N] s_i;//mean seed surv
+  real mc_mean_lambda;
+  real mc_sd_lambda;
 // population sizes of interacting species at time t
 vector [N] acam;
 vector [N] avba;
@@ -26,7 +28,8 @@ parameters{
   real epsilon [N_blocks];
   real<lower=0> disp_dev; //might only be required with the negative binomial?
   //lambda
-  real <lower=0,upper=20000> lambda_base;
+  real <lower=0,upper=20000> lambda;
+
   //alphas
   real  alpha_weeds;
   real  alpha_acam;
@@ -46,7 +49,8 @@ model{
 //priors
   sigma~gamma(1,1);
   epsilon~gamma (sigma,sigma);
-  lambda_base~exponential(0.0009);//check on this for my data, make a variable and read in to use meagcomp as priors?
+  lambda ~ normal(mc_mean_lambda, mc_sd_lambda);
+  //lambda~exponential(0.0009);//check on this for my data, make a variable and read in to use meagcomp as priors?
   alpha_acam~normal(0,5);
   alpha_avba~normal(0,5);
   alpha_erbo~normal(0,5);
@@ -56,9 +60,10 @@ model{
   alpha_taca~normal(0,5);
   alpha_trwi~normal(0,5);
   alpha_weeds~normal(0,5);//might have to change when weeds are in stems vs percents
+
 //BH model
 for(i in 1:N){
-F_hat[i]=s_i[i]*(1-g_i[i])+(N_i[i]*g_i[i]*(lambda_base)/(1+
+F_hat[i]=s_i[i]*(1-g_i[i])+(N_i[i]*g_i[i]*(lambda)/(1+
   acam[i]*(alpha_acam*g_i[i])+
   avba[i]*(alpha_avba*g_i[i])+
   erbo[i]*(alpha_erbo*g_i[i])+
