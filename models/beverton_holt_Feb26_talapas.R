@@ -1,7 +1,7 @@
 ## Model script
 
 library(tidyverse)
-#library(bayesplot)
+library(bayesplot)
 library(rstan)
 #library(here)
 setwd("~/Data")
@@ -107,5 +107,45 @@ for(i in species){
     ## save model output
     save(PrelimFit, file = paste0("~/model_outputs/",i,"_",j,"_posteriors_BH_negbin", date ,".rdata"))
 
+  }
+}
+
+
+###################
+########## now extract posteriors
+species2<-c("ACAM","AVAB","ERBO","GITR","LOMU","PLER","TACA","TRWI")
+treatment2<-c("D","A","AC","AG","ANG","ING","IN","DNG","IG","AN","DN","ACN","DG","I")
+
+#c("D","A","AC","IN","AN","DN","I")
+#"D","A","AC","AG","ANG","ING","IN","DNG","IG","AN",
+for (i in species2){
+  for (j in treatment2){
+    if(file.exists(paste0("~/Desktop/talapas_model_outputs/Feb_09_26/",i,"_",j,"_posteriors_BH_negbin2026-02-09.rdata"))==TRUE){
+      load(file=paste0("~/Desktop/talapas_model_outputs/Feb_09_26/",i,"_",j,"_posteriors_BH_negbin2026-02-09.rdata"))
+    } else next
+    
+    PrelimPosteriors <- extract(PrelimFit) ###
+    
+    ##### Diagnostic plots
+    # First check the distribution of Rhats and effective sample sizes
+    #hist(summary(PrelimFit)$summary[,"Rhat"])
+    rhat_plot<-stan_rhat(PrelimFit)+labs(title = paste0(i,"_",j))
+    ggsave(paste0("~/Desktop/talapas_model_outputs/diagnostic_figures/",i,"_",j,"_rhat.pdf"), plot=rhat_plot,device="pdf",width = 10, height = 8)
+    
+    ### effective sample size
+    ess_plot<-stan_ess(PrelimFit)+labs(title = paste0(i,"_",j))### neff to total sample size
+    ggsave(paste0("~/Desktop/talapas_model_outputs/diagnostic_figures/",i,"_",j,"_ess.pdf"), plot=ess_plot,device="pdf",width = 10, height = 8)
+    
+    #hist(summary(PrelimFit)$summary[,"n_eff"])
+    # Next check the correlation among key model parameters and identify any
+    #       divergent transitions
+    parms<-nuts_params(PrelimFit)
+    mcmc_plot<-mcmc_pairs(PrelimFit,pars = c("lambda","alpha_acam","alpha_avba","alpha_erbo","alpha_gitr","alpha_lomu","alpha_pler","alpha_taca","alpha_trwi"),max_treedepth = 15,np=parms)
+    #pair_plot<-pairs(PrelimFit, pars = c("lambdas", "alpha_generic", "alpha_intra"),main=paste0(i,"_",j))
+    ggsave(paste0("~/Desktop/talapas_model_outputs/diagnostic_figures/",i,"_",j,"_pairs.pdf"), plot=mcmc_plot,device="pdf",width = 10, height = 8)
+    
+    # Finally, check for autocorrelation in the posteriors of key model parameters
+    ac_plot<-stan_ac(PrelimFit,pars = c("lambda","alpha_acam","alpha_avba","alpha_erbo","alpha_gitr","alpha_lomu","alpha_pler","alpha_taca","alpha_trwi"))+labs(title = paste0(i,"_",j))
+    ggsave(paste0("~/Desktop/talapas_model_outputs/diagnostic_figures/",i,"_",j,"_acf.pdf"), plot=ac_plot,device="pdf",width = 10, height = 8)
   }
 }
