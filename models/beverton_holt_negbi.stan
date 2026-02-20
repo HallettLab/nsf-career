@@ -8,7 +8,7 @@ data{
   vector[N] N_i;// pop size at time t
   vector[N] g_i;// mean germ rate
   vector[N] s_i;//mean seed surv
-  real mc_mean_lambda;
+  real mc_mean_lambda; //lambda priors
   real mc_sd_lambda;
 // population sizes of interacting species at time t
 vector [N] acam;

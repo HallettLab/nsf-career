@@ -4,13 +4,13 @@ library(tidyverse)
 library(bayesplot)
 library(rstan)
 #library(here)
-setwd("~/Data")
+setwd("~/Desktop/career_r/data")
 model.dat <- read.csv("career_model_data_Aug20_25.csv")%>%
   filter(!(is.na(num_seeds)))%>%##### removes samples that are in datasheet but weren't found during processing
   mutate_at((vars("weeds","sp_mean_lambda_mc")),~replace_na(.,0))%>%
   mutate_at("sp_sd_lambda_mc",~replace_na(.,1)) #### some Mono samples (and TRWI bkgs) have weeds as NA, the priors have been updated for each species
 
-setwd("~/R_scripts")
+setwd("~/Desktop/career_repo/models")
 
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
@@ -20,10 +20,10 @@ species <- c("ACAM","AVBA","ERBO","GITR","LOMU","PLER","TACA") ## dropping TRWI
 treatment<-c("D","A","AC","AG","ANG","ING","IN","DNG","IG","AN","DN","ACN","DG","I")
 model.output <- list()
 warnings <- list()
-
+ptm<-proc.time()
 for(i in species){
   for(j in treatment){
-    tic("model time")
+    #tic("model time")
     dat <- subset(model.dat, phyto == i & treatment==j)
     
     ## create vectors of the various data inputs
@@ -63,28 +63,27 @@ for(i in species){
     gitr<-as.integer(dat$GITR)
     lomu<-as.integer(dat$LOMU)
     pler<-as.integer(dat$PLER)
+    weeds<-as.integer(dat$weeds)
     #trwi<-as.integer(dat$TRIW)
     
-    
-    if (i== "TACA"){
-      weeds <- as.integer(dat$total_weeds_n) 
-    } else if(i=="LOMU"){
-      weeds <- as.integer(dat$total_weeds_n)
-    } else if(i=="AVBA"){
-      weeds <- as.integer(dat$total_weeds_n) 
-    } else if(i == "GITR"){
-      weeds<-as.integer(dat$total_weed_cover)
-    } else if(i== "PLER"){
-      weeds<-as.integer(dat$total_weed_cover)
-    }else if (i=="ERBO"){
-      weeds<-as.integer(dat$total_weed_cover)
-    #}else if (i=="TRWI"){
-      #weeds<-as.integer(dat$total_weed_cover)
-    }
-    else if (i=="ACAM"){
-      weeds<-as.integer(dat$neigh_weeds)
-    }
-    
+    # if (i== "TACA"){
+    #   weeds <- as.integer(dat$total_weeds_n) 
+    # } else if(i=="LOMU"){
+    #   weeds <- as.integer(dat$total_weeds_n)
+    # } else if(i=="AVBA"){
+    #   weeds <- as.integer(dat$total_weeds_n) 
+    # } else if(i == "GITR"){
+    #   weeds<-as.integer(dat$total_weed_cover)
+    # } else if(i== "PLER"){
+    #   weeds<-as.integer(dat$total_weed_cover)
+    # }else if (i=="ERBO"){
+    #   weeds<-as.integer(dat$total_weed_cover)
+    # #}else if (i=="TRWI"){
+    #   #weeds<-as.integer(dat$total_weed_cover)
+    # }
+    # else if (i=="ACAM"){
+    #   weeds<-as.integer(dat$neigh_weeds)
+    # }
     
     ## make a vector of data inputs to model
     
@@ -99,7 +98,7 @@ for(i in species){
     
     # Model ####
     print(paste("running",i,j,sep = "_"))
-    PrelimFit <- stan(file="~/R_scripts/beverton_holt_negbi.stan", model_name="beverton_holt_negbi",
+    PrelimFit <- stan(file="~/Desktop/career_repo/models/beverton_holt_negbi.stan", model_name="beverton_holt_negbi",
                       data = data_vec, init = initials1, iter = 25000, chains = 4, cores=4,
                       control = list(adapt_delta = 0.95, max_treedepth = 15)) 
     
@@ -109,7 +108,10 @@ for(i in species){
 
   }
 }
-
+#### if you get an error message and to check specific lines
+stanmod <- readLines("~/Desktop/career_repo/models/BH_sparse_preliminary.stan")
+stanmod <- stanmod[stanmod != ""]
+stanmod[87] ### line number of the error message, the number given usually doesn't match the line of code in the model
 
 ###################
 ########## now extract posteriors
