@@ -1,10 +1,13 @@
-// Try to write a BH model
+// BH model with updated array syntax as demanded by rstan version run through talapas
 //input data
 data{
   int <lower=1> N;//number of observations
   int <lower=1> N_blocks;// groups
-  int Blocks[N];// block column
-  int Fecundity [N];// at time t+1
+  array [N] int Blocks;// block column
+  //int Blocks[N];// block column
+  array [N] int Fecundity// had to redefine this and blocks, error message when running on the cluster 
+  //that the old syntax wasn't usable, rstan 2.36.0.9000 on talapas and 2.32.6 on my computer, old syntax works fine for me
+  //int Fecundity [N];// at time t+1
   vector[N] N_i;// pop size at time t
   vector[N] g_i;// mean germ rate
   vector[N] s_i;//mean seed surv

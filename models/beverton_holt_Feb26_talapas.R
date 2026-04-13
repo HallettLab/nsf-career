@@ -98,21 +98,21 @@ for(i in species){
     
     # Model ####
     print(paste("running",i,j,sep = "_"))
-    PrelimFit <- stan(file="~/R_Scripts/beverton_holt_negbi.stan", model_name="beverton_holt_negbi",
-                      data = data_vec, init = initials1, iter = 25000, chains = 4, cores=4,
-                      control = list(adapt_delta = 0.95, max_treedepth = 15)) 
+    PrelimFit <- stan(file="~/R_Scripts/bh_new_syntax.stan", model_name="beverton_holt_new",
+                      data = data_vec, init = initials1, iter = 30000, chains = 4, cores=4,
+                      control = list(adapt_delta = 0.99, max_treedepth = 15)) 
     
     
     ## save model output
-    save(PrelimFit, file = paste0("~/Model_outputs/Feb_22/",i,"_",j,"_posteriors_BH", date ,".rdata"))
+    save(PrelimFit, file = paste0("~/Model_outputs/Feb_27_26/",i,"_",j,"_posteriors_BH_", date ,".rdata"))
     
   }
 }
 proc.time()-ptm
 #### if you get an error message and to check specific lines
-stanmod <- readLines("~/Desktop/career_repo/models/BH_sparse_preliminary.stan")
+stanmod <- readLines("~/Desktop/career_repo/models/BH_sparse_preliminary.stan")#### path to your stan model
 stanmod <- stanmod[stanmod != ""]
-stanmod[87] ### line number of the error message, the number given usually doesn't match the line of code in the model
+stanmod[87] ### line number of the error message, the number given in the error message usually doesn't match the line of code in the model
 
 ###################
 ########## now extract posteriors
@@ -125,8 +125,8 @@ treatment2<-c("D","A","AC","AG","ANG","ING","IN","DNG","IG","AN","DN","ACN","DG"
 #"D","A","AC","AG","ANG","ING","IN","DNG","IG","AN",
 for (i in species2){
   for (j in treatment2){
-    if(file.exists(paste0("~/Desktop/talapas_model_outputs/Feb_23_26/",i,"_",j,"_posteriors_BH2026-02-23.rdata"))==TRUE){
-      load(file=paste0("~/Desktop/talapas_model_outputs/Feb_23_26/",i,"_",j,"_posteriors_BH2026-02-23.rdata"))
+    if(file.exists(paste0("~/Desktop/talapas_model_outputs/Feb_27_26/",i,"_",j,"_posteriors_BH2026-02-27.rdata"))==TRUE){
+      load(file=paste0("~/Desktop/talapas_model_outputs/Feb_27_26/",i,"_",j,"_posteriors_BH2026-02-27.rdata"))
     } else next
     print(paste("running",i,j,sep = "_"))
     
